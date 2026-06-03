@@ -1,6 +1,26 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import Checkbox from '../components/ui/Checkbox';
+import type { CartItem } from '../types/cartItem';
+
+const MockData: CartItem[] = [
+  {
+    id: 1,
+    imageUrl:
+      'https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/8802aadd-4172-40d1-a6ce-83018ee6b6a7/NIKE+PACIFIC+%28GS%29.png',
+    name: '나이키 퍼시픽 주니어',
+    quantity: 2,
+    price: 50000,
+  },
+  {
+    id: 2,
+    imageUrl:
+      'https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/a2b045e0-f73d-45e4-bac8-8510270fde8f/AIR+MAX+95+BB+LTR+%28GS%29.png',
+    name: '나이키 에어맥스 95',
+    quantity: 1,
+    price: 70000,
+  },
+];
 
 function Cart() {
   const [allChecked, setAllChecked] = useState(false);
