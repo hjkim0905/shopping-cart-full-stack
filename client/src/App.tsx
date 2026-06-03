@@ -1,5 +1,7 @@
+import Cart from './pages/Cart';
+
 function App() {
-  return <h1>장바구니</h1>;
+  return <Cart />;
 }
 
 export default App;
