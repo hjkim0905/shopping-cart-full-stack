@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import styled from '@emotion/styled';
+import Checkbox from '../components/ui/Checkbox';
 
 function Cart() {
+  const [allChecked, setAllChecked] = useState(false);
+
   return (
     <PageContainer>
       <Banner>
@@ -10,6 +14,9 @@ function Cart() {
         <h1 id="cart-title">장바구니</h1>
         <p id="cart-description">현재 2종류의 상품이 담겨있습니다.</p>
       </CartTitle>
+      <CartList>
+        <Checkbox checked={allChecked} onChange={setAllChecked} label="전체선택" />
+      </CartList>
     </PageContainer>
   );
 }
@@ -44,7 +51,6 @@ const Banner = styled.div`
 `;
 
 const CartTitle = styled.div`
-  background-color: blue;
   box-sizing: border-box;
   padding: 2.25rem 1.5rem 2.25rem 1.5rem;
   width: 100%;
@@ -70,4 +76,12 @@ const CartTitle = styled.div`
     line-height: 15px;
     letter-spacing: 0%;
   }
+`;
+
+const CartList = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding-left: 1.5rem;
 `;
