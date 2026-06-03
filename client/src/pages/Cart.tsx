@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import Checkbox from '../components/ui/Checkbox';
-import type { CartItem } from '../types/cartItem';
+import type { CartItemType } from '../types/cartItemType';
+import CartItem from '../components/CartItem';
 
-const MockData: CartItem[] = [
+const MockData: CartItemType[] = [
   {
     id: 1,
     imageUrl:
@@ -36,6 +37,9 @@ function Cart() {
       </CartTitle>
       <CartList>
         <Checkbox checked={allChecked} onChange={setAllChecked} label="전체선택" />
+        {MockData.map((item) => {
+          return <CartItem key={item.id} item={item} />;
+        })}
       </CartList>
     </PageContainer>
   );
@@ -103,5 +107,6 @@ const CartList = styled.div`
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding-left: 1.5rem;
+  padding: 0 1.5rem 3.25rem 1.5rem;
+  background-color: yellow;
 `;
