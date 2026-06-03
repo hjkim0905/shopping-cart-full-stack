@@ -8,7 +8,6 @@ function CartItem({ item }: { item: CartItemType }) {
 export default CartItem;
 
 const ItemContainer = styled.div`
-  background-color: blue;
   width: 100%;
   box-sizing: border-box;
   margin-top: 1.5rem;

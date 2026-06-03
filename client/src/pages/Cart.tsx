@@ -43,6 +43,7 @@ function Cart() {
         })}
       </CartList>
       <OrderSummary />
+      <OrderConfirmButton>주문하기</OrderConfirmButton>
     </PageContainer>
   );
 }
@@ -110,5 +111,27 @@ const CartList = styled.div`
   flex-direction: column;
   box-sizing: border-box;
   padding: 0 1.5rem 3.25rem 1.5rem;
-  background-color: yellow;
+`;
+
+const OrderConfirmButton = styled.button`
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 580px;
+  height: 64px;
+  background-color: #000000;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+
+  font-family: Noto Sans;
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 16px;
+  line-height: 16px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
 `;

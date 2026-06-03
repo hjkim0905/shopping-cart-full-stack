@@ -41,7 +41,6 @@ function OrderSummary() {
 export default OrderSummary;
 
 const SummaryContainer = styled.div`
-  background-color: green;
   padding: 0 1.5rem 0 1.5rem;
   display: flex;
   flex-direction: column;
@@ -70,7 +69,6 @@ const SummaryWrapper = styled.div`
   box-sizing: border-box;
   margin-top: 0.75rem;
   gap: 0.5rem;
-  background-color: aqua;
 
   #summary-row {
     display: flex;
