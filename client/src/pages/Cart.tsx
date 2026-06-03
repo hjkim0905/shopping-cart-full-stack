@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import Checkbox from '../components/ui/Checkbox';
 import type { CartItemType } from '../types/cartItemType';
 import CartItem from '../components/CartItem';
+import OrderSummary from '../components/OrderSummary';
 
 const MockData: CartItemType[] = [
   {
@@ -41,6 +42,7 @@ function Cart() {
           return <CartItem key={item.id} item={item} />;
         })}
       </CartList>
+      <OrderSummary />
     </PageContainer>
   );
 }
