@@ -110,7 +110,7 @@ function Cart() {
   };
 
   const calculateDeliveryFee = (orderAmount: number): number => {
-    if (orderAmount >= 100000) return 0;
+    if (orderAmount >= 100000 || orderAmount === 0) return 0;
     else return 3000;
   };
 
@@ -121,12 +121,14 @@ function Cart() {
       </Banner>
       <CartTitle>
         <h1 id="cart-title">장바구니</h1>
-        <p id="cart-description">현재 {cartProducts.length}종류의 상품이 담겨있습니다.</p>
+        {cartProducts.length > 0 && (
+          <p id="cart-description">현재 {cartProducts.length}종류의 상품이 담겨있습니다.</p>
+        )}
       </CartTitle>
-      <CartList>
-        <Checkbox checked={allChecked} onChange={handleAllCheck} label="전체선택" />
-        {cartProducts.map((item) => {
-          return (
+      {cartProducts.length > 0 ? (
+        <CartList>
+          <Checkbox checked={allChecked} onChange={handleAllCheck} label="전체선택" />
+          {cartProducts.map((item) => (
             <CartItem
               key={item.id}
               item={item}
@@ -135,9 +137,13 @@ function Cart() {
               handleDelete={() => deleteCartItem(item.id)}
               onQuantityChange={handleQuantityChange}
             />
-          );
-        })}
-      </CartList>
+          ))}
+        </CartList>
+      ) : (
+        <EmptyCart>
+          <p>장바구니에 담은 상품이 없습니다.</p>
+        </EmptyCart>
+      )}
       <OrderSummary
         orderAmount={calculateOrderAmount(cartProducts, checkedIds)}
         calculateDeliveryFee={calculateDeliveryFee}
@@ -214,6 +220,24 @@ const CartList = styled.div`
   padding: 0 1.5rem 3.25rem 1.5rem;
   flex: 1;
   overflow-y: auto;
+`;
+
+const EmptyCart = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  p {
+    font-family: Noto Sans;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 16px;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+  }
 `;
 
 const OrderConfirmButton = styled.button<{ disabled: boolean }>`

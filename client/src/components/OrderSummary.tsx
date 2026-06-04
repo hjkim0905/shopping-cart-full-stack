@@ -7,6 +7,10 @@ function OrderSummary({
   orderAmount: number;
   calculateDeliveryFee: (orderAmount: number) => number;
 }) {
+  const amount = orderAmount;
+  const deliveryFee = calculateDeliveryFee(amount);
+  const totalAmount = amount + deliveryFee;
+
   return (
     <SummaryContainer>
       <DescriptionRow>
@@ -27,17 +31,17 @@ function OrderSummary({
       <SummaryWrapper>
         <div id="summary-row">
           <h2>주문 금액</h2>
-          <p>{orderAmount.toLocaleString()}</p>
+          <p>{orderAmount.toLocaleString()}원</p>
         </div>
         <div id="summary-row">
           <h2>배송비</h2>
-          <p>{calculateDeliveryFee(orderAmount).toLocaleString()}원</p>
+          <p>{deliveryFee.toLocaleString()}원</p>
         </div>
       </SummaryWrapper>
       <SummaryWrapper>
         <div id="summary-row">
           <h2>총 결제 금액</h2>
-          <p>73,000원</p>
+          <p>{totalAmount.toLocaleString()}원</p>
         </div>
       </SummaryWrapper>
     </SummaryContainer>
