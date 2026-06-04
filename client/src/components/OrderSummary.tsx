@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-function OrderSummary() {
+function OrderSummary({ orderAmount }: { orderAmount: number }) {
   return (
     <SummaryContainer>
       <DescriptionRow>
@@ -21,7 +21,7 @@ function OrderSummary() {
       <SummaryWrapper>
         <div id="summary-row">
           <h2>주문 금액</h2>
-          <p>70,000원</p>
+          <p>{orderAmount}</p>
         </div>
         <div id="summary-row">
           <h2>배송비</h2>

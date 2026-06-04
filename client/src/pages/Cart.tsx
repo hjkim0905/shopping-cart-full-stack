@@ -99,6 +99,12 @@ function Cart() {
     });
   };
 
+  const calculateOrderAmount = (cartProducts: CartItemType[], checkedIds: Set<number>): number => {
+    return cartProducts
+      .filter((product) => checkedIds.has(product.id))
+      .reduce((sum, product) => sum + product.price, 0);
+  };
+
   return (
     <PageContainer>
       <Banner>
@@ -123,7 +129,7 @@ function Cart() {
           );
         })}
       </CartList>
-      <OrderSummary />
+      <OrderSummary orderAmount={calculateOrderAmount(cartProducts, checkedIds)} />
       <OrderConfirmButton disabled={checkedIds.size === 0}>주문하기</OrderConfirmButton>
     </PageContainer>
   );
