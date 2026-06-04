@@ -8,13 +8,20 @@ import { deleteCartProduct, getCartProducts, updateCartProduct } from '../api/ap
 
 function Cart() {
   const [cartProducts, setCartProducts] = useState<CartItemType[]>([]);
-  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
+  const [checkedIds, setCheckedIds] = useState<Set<number>>(() => {
+    const savedCheckedIds = localStorage.getItem('cart-checked');
+    return savedCheckedIds ? new Set(JSON.parse(savedCheckedIds)) : new Set();
+  });
 
   useEffect(() => {
     const fetchCart = async (): Promise<void> => {
       try {
         const responseData = await getCartProducts();
         setCartProducts(responseData);
+
+        if (localStorage.getItem('cart-checked') === null) {
+          setCheckedIds(new Set(responseData.map((item) => item.id)));
+        }
       } catch (error) {
         if (error instanceof Error) {
           console.error(error.message);
@@ -47,6 +54,13 @@ function Cart() {
     try {
       await deleteCartProduct(productId);
       setCartProducts((prev) => prev.filter((product) => product.id !== productId));
+
+      setCheckedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(productId);
+        localStorage.setItem('cart-checked', JSON.stringify([...next]));
+        return next;
+      });
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -58,17 +72,29 @@ function Cart() {
 
   const handleAllCheck = (checked: boolean) => {
     if (checked) {
-      setCheckedIds(new Set(cartProducts.map((item) => item.id)));
+      const allIds = cartProducts.map((item) => item.id);
+      setCheckedIds(new Set(allIds));
+      localStorage.setItem('cart-checked', JSON.stringify([...allIds]));
     } else {
       setCheckedIds(new Set());
+      localStorage.removeItem('cart-checked');
     }
   };
 
   const handleItemCheck = (id: number, checked: boolean) => {
     setCheckedIds((prev) => {
       const next = new Set(prev);
-      if (checked) next.add(id);
-      else next.delete(id);
+      if (checked) {
+        next.add(id);
+        localStorage.setItem('cart-checked', JSON.stringify([...next]));
+      } else {
+        next.delete(id);
+        if (next.size === 0) {
+          localStorage.removeItem('cart-checked');
+        } else {
+          localStorage.setItem('cart-checked', JSON.stringify([...next]));
+        }
+      }
       return next;
     });
   };
