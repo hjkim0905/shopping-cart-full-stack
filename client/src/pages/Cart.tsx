@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
+import { keyframes } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
 import Checkbox from '../components/ui/Checkbox';
 import type { CartItemType } from '../types/cartItemType';
@@ -10,6 +11,8 @@ import { deleteCartProduct, getCartProducts, updateCartProduct } from '../api/ap
 function Cart() {
   const navigate = useNavigate();
   const [cartProducts, setCartProducts] = useState<CartItemType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(() => {
     const savedCheckedIds = localStorage.getItem('cart-checked');
     return savedCheckedIds ? new Set(JSON.parse(savedCheckedIds)) : new Set();
@@ -17,6 +20,7 @@ function Cart() {
 
   useEffect(() => {
     const fetchCart = async (): Promise<void> => {
+      setIsLoading(true);
       try {
         const responseData = await getCartProducts();
         setCartProducts(responseData);
@@ -24,10 +28,10 @@ function Cart() {
         if (localStorage.getItem('cart-checked') === null) {
           setCheckedIds(new Set(responseData.map((item) => item.id)));
         }
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(error.message);
-        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '장바구니를 불러오지 못했습니다.');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -127,7 +131,15 @@ function Cart() {
           <p id="cart-description">현재 {cartProducts.length}종류의 상품이 담겨있습니다.</p>
         )}
       </CartTitle>
-      {cartProducts.length > 0 ? (
+      {isLoading ? (
+        <LoadingContainer>
+          <Spinner />
+        </LoadingContainer>
+      ) : error ? (
+        <ErrorContainer>
+          <p>{error}</p>
+        </ErrorContainer>
+      ) : cartProducts.length > 0 ? (
         <CartList>
           <Checkbox checked={allChecked} onChange={handleAllCheck} label="전체선택" />
           {cartProducts.map((item) => (
@@ -228,6 +240,41 @@ const CartTitle = styled.div`
     font-size: 12px;
     line-height: 15px;
     letter-spacing: 0%;
+  }
+`;
+
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
+
+const LoadingContainer = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Spinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #000000;
+  border-radius: 50%;
+  animation: ${spin} 0.8s linear infinite;
+`;
+
+const ErrorContainer = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  p {
+    font-family: Noto Sans;
+    font-size: 14px;
+    color: #ff4d4f;
+    text-align: center;
   }
 `;
 
