@@ -65,6 +65,7 @@ const SummaryWrapper = styled.div`
   display: flex;
   flex-direction: column;
   border-top: 1px solid #0000001a;
+  padding-top: 0.75rem;
   width: 100%;
   box-sizing: border-box;
   margin-top: 0.75rem;
