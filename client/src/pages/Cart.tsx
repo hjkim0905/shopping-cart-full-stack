@@ -53,7 +53,7 @@ function Cart() {
       </Banner>
       <CartTitle>
         <h1 id="cart-title">장바구니</h1>
-        <p id="cart-description">현재 2종류의 상품이 담겨있습니다.</p>
+        <p id="cart-description">현재 {MockData.length}종류의 상품이 담겨있습니다.</p>
       </CartTitle>
       <CartList>
         <Checkbox checked={allChecked} onChange={handleAllCheck} label="전체선택" />
