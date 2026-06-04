@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
+import { useNavigate } from 'react-router-dom';
 import Checkbox from '../components/ui/Checkbox';
 import type { CartItemType } from '../types/cartItemType';
 import CartItem from '../components/CartItem';
@@ -7,6 +8,7 @@ import OrderSummary from '../components/OrderSummary';
 import { deleteCartProduct, getCartProducts, updateCartProduct } from '../api/api';
 
 function Cart() {
+  const navigate = useNavigate();
   const [cartProducts, setCartProducts] = useState<CartItemType[]>([]);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(() => {
     const savedCheckedIds = localStorage.getItem('cart-checked');
@@ -148,7 +150,24 @@ function Cart() {
         orderAmount={calculateOrderAmount(cartProducts, checkedIds)}
         calculateDeliveryFee={calculateDeliveryFee}
       />
-      <OrderConfirmButton disabled={checkedIds.size === 0}>주문하기</OrderConfirmButton>
+      <OrderConfirmButton
+        disabled={checkedIds.size === 0}
+        onClick={() => {
+          const orderAmount = calculateOrderAmount(cartProducts, checkedIds);
+          const totalAmount = orderAmount + calculateDeliveryFee(orderAmount);
+          const checkedProducts = cartProducts.filter((p) => checkedIds.has(p.id));
+          const totalQuantity = checkedProducts.reduce((sum, p) => sum + p.quantity, 0);
+          navigate('/shopping-cart/confirm', {
+            state: {
+              totalAmount,
+              productCount: checkedIds.size,
+              totalQuantity,
+            },
+          });
+        }}
+      >
+        주문하기
+      </OrderConfirmButton>
     </PageContainer>
   );
 }
