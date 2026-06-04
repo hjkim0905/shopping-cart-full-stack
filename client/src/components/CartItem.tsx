@@ -1,15 +1,20 @@
 import styled from '@emotion/styled';
 import type { CartItemType } from '../types/cartItemType';
 import Checkbox from './ui/Checkbox';
-import { useState } from 'react';
 
-function CartItem({ item }: { item: CartItemType }) {
-  const [checked, setChecked] = useState(false);
-
+function CartItem({
+  item,
+  checked,
+  onCheck,
+}: {
+  item: CartItemType;
+  checked: boolean;
+  onCheck: (checked: boolean) => void;
+}) {
   return (
     <ItemContainer>
       <CheckboxRow>
-        <Checkbox checked={checked} onChange={setChecked} />
+        <Checkbox checked={checked} onChange={onCheck} />
         <DeleteButton>삭제</DeleteButton>
       </CheckboxRow>
       <ProductContainer>

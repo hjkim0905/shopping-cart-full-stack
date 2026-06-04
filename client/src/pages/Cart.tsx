@@ -25,7 +25,26 @@ const MockData: CartItemType[] = [
 ];
 
 function Cart() {
-  const [allChecked, setAllChecked] = useState(false);
+  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
+
+  const allChecked = checkedIds.size === MockData.length;
+
+  const handleAllCheck = (checked: boolean) => {
+    if (checked) {
+      setCheckedIds(new Set(MockData.map((item) => item.id)));
+    } else {
+      setCheckedIds(new Set());
+    }
+  };
+
+  const handleItemCheck = (id: number, checked: boolean) => {
+    setCheckedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
 
   return (
     <PageContainer>
@@ -37,13 +56,20 @@ function Cart() {
         <p id="cart-description">현재 2종류의 상품이 담겨있습니다.</p>
       </CartTitle>
       <CartList>
-        <Checkbox checked={allChecked} onChange={setAllChecked} label="전체선택" />
+        <Checkbox checked={allChecked} onChange={handleAllCheck} label="전체선택" />
         {MockData.map((item) => {
-          return <CartItem key={item.id} item={item} />;
+          return (
+            <CartItem
+              key={item.id}
+              item={item}
+              checked={checkedIds.has(item.id)}
+              onCheck={(checked) => handleItemCheck(item.id, checked)}
+            />
+          );
         })}
       </CartList>
       <OrderSummary />
-      <OrderConfirmButton>주문하기</OrderConfirmButton>
+      <OrderConfirmButton disabled={checkedIds.size === 0}>주문하기</OrderConfirmButton>
     </PageContainer>
   );
 }
@@ -113,7 +139,7 @@ const CartList = styled.div`
   padding: 0 1.5rem 3.25rem 1.5rem;
 `;
 
-const OrderConfirmButton = styled.button`
+const OrderConfirmButton = styled.button<{ disabled: boolean }>`
   position: fixed;
   bottom: 0;
   left: 50%;
@@ -121,10 +147,10 @@ const OrderConfirmButton = styled.button`
   width: 100%;
   max-width: 580px;
   height: 64px;
-  background-color: #000000;
+  background-color: ${({ disabled }) => (disabled ? '#BEBEBE' : '#000000')};
   color: #ffffff;
   border: none;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 
   font-family: Noto Sans;
   font-weight: 700;
