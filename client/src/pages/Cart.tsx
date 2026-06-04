@@ -1,37 +1,64 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import Checkbox from '../components/ui/Checkbox';
 import type { CartItemType } from '../types/cartItemType';
 import CartItem from '../components/CartItem';
 import OrderSummary from '../components/OrderSummary';
-
-const MockData: CartItemType[] = [
-  {
-    id: 1,
-    imageUrl:
-      'https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/8802aadd-4172-40d1-a6ce-83018ee6b6a7/NIKE+PACIFIC+%28GS%29.png',
-    name: '나이키 퍼시픽 주니어',
-    quantity: 2,
-    price: 50000,
-  },
-  {
-    id: 2,
-    imageUrl:
-      'https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/a2b045e0-f73d-45e4-bac8-8510270fde8f/AIR+MAX+95+BB+LTR+%28GS%29.png',
-    name: '나이키 에어맥스 95',
-    quantity: 1,
-    price: 70000,
-  },
-];
+import { deleteCartProduct, getCartProducts, updateCartProduct } from '../api/api';
 
 function Cart() {
+  const [cartProducts, setCartProducts] = useState<CartItemType[]>([]);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
 
-  const allChecked = checkedIds.size === MockData.length;
+  useEffect(() => {
+    const fetchCart = async (): Promise<void> => {
+      try {
+        const responseData = await getCartProducts();
+        setCartProducts(responseData);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(error.message);
+        }
+      }
+    };
+
+    fetchCart();
+  }, []);
+
+  const handleQuantityChange = async (productId: number, newQuantity: number) => {
+    const item = cartProducts.find((product) => product.id === productId);
+    if (!item) return;
+
+    const updated = { ...item, quantity: newQuantity };
+    setCartProducts((prev) =>
+      prev.map((product) => (product.id === productId ? updated : product)),
+    );
+
+    try {
+      await updateCartProduct(updated);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      }
+    }
+  };
+
+  const deleteCartItem = async (productId: number): Promise<void> => {
+    try {
+      await deleteCartProduct(productId);
+      setCartProducts((prev) => prev.filter((product) => product.id !== productId));
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      }
+    }
+  };
+
+  const allChecked = cartProducts.length > 0 && checkedIds.size === cartProducts.length;
 
   const handleAllCheck = (checked: boolean) => {
     if (checked) {
-      setCheckedIds(new Set(MockData.map((item) => item.id)));
+      setCheckedIds(new Set(cartProducts.map((item) => item.id)));
     } else {
       setCheckedIds(new Set());
     }
@@ -53,17 +80,19 @@ function Cart() {
       </Banner>
       <CartTitle>
         <h1 id="cart-title">장바구니</h1>
-        <p id="cart-description">현재 {MockData.length}종류의 상품이 담겨있습니다.</p>
+        <p id="cart-description">현재 {cartProducts.length}종류의 상품이 담겨있습니다.</p>
       </CartTitle>
       <CartList>
         <Checkbox checked={allChecked} onChange={handleAllCheck} label="전체선택" />
-        {MockData.map((item) => {
+        {cartProducts.map((item) => {
           return (
             <CartItem
               key={item.id}
               item={item}
               checked={checkedIds.has(item.id)}
               onCheck={(checked) => handleItemCheck(item.id, checked)}
+              handleDelete={() => deleteCartItem(item.id)}
+              onQuantityChange={handleQuantityChange}
             />
           );
         })}
@@ -80,6 +109,8 @@ const PageContainer = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-bottom: 6.5rem;
+  box-sizing: border-box;
 `;
 
 const Banner = styled.div`
@@ -137,6 +168,8 @@ const CartList = styled.div`
   flex-direction: column;
   box-sizing: border-box;
   padding: 0 1.5rem 3.25rem 1.5rem;
+  flex: 1;
+  overflow-y: auto;
 `;
 
 const OrderConfirmButton = styled.button<{ disabled: boolean }>`

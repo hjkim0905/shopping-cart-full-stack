@@ -6,16 +6,20 @@ function CartItem({
   item,
   checked,
   onCheck,
+  handleDelete,
+  onQuantityChange,
 }: {
   item: CartItemType;
   checked: boolean;
   onCheck: (checked: boolean) => void;
+  handleDelete: () => void;
+  onQuantityChange: (id: number, newQuantity: number) => void;
 }) {
   return (
     <ItemContainer>
       <CheckboxRow>
         <Checkbox checked={checked} onChange={onCheck} />
-        <DeleteButton>삭제</DeleteButton>
+        <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
       </CheckboxRow>
       <ProductContainer>
         <img src={item.imageUrl} />
@@ -23,7 +27,10 @@ function CartItem({
           <h2 id="item-name">{item.name}</h2>
           <h2 id="item-price">{item.price}</h2>
           <div id="item-quantity-row">
-            <button id="quantity-minus">
+            <button
+              id="quantity-minus"
+              onClick={() => onQuantityChange(item.id, item.quantity - 1)}
+            >
               <svg
                 width="24"
                 height="24"
@@ -51,7 +58,7 @@ function CartItem({
               </svg>
             </button>
             <p id="item-quantity">{item.quantity}</p>
-            <button id="quantity-plus">
+            <button id="quantity-plus" onClick={() => onQuantityChange(item.id, item.quantity + 1)}>
               <svg
                 width="24"
                 height="24"
