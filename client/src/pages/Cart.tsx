@@ -38,6 +38,7 @@ function Cart() {
 
     const previous = [...cartProducts];
 
+    if (newQuantity < 1 || newQuantity > 99) return;
     const updated = { ...item, quantity: newQuantity };
     setCartProducts((prev) =>
       prev.map((product) => (product.id === productId ? updated : product)),
@@ -105,10 +106,13 @@ function Cart() {
   const calculateOrderAmount = (cartProducts: CartItemType[], checkedIds: Set<number>): number => {
     return cartProducts
       .filter((product) => checkedIds.has(product.id))
-      .reduce((sum, product) => sum + product.price, 0);
+      .reduce((sum, product) => sum + product.price * product.quantity, 0);
   };
 
-  // const calculateDeliveryFee = ()
+  const calculateDeliveryFee = (orderAmount: number): number => {
+    if (orderAmount >= 100000) return 0;
+    else return 3000;
+  };
 
   return (
     <PageContainer>
@@ -134,7 +138,10 @@ function Cart() {
           );
         })}
       </CartList>
-      <OrderSummary orderAmount={calculateOrderAmount(cartProducts, checkedIds)} />
+      <OrderSummary
+        orderAmount={calculateOrderAmount(cartProducts, checkedIds)}
+        calculateDeliveryFee={calculateDeliveryFee}
+      />
       <OrderConfirmButton disabled={checkedIds.size === 0}>주문하기</OrderConfirmButton>
     </PageContainer>
   );

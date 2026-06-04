@@ -1,6 +1,12 @@
 import styled from '@emotion/styled';
 
-function OrderSummary({ orderAmount }: { orderAmount: number }) {
+function OrderSummary({
+  orderAmount,
+  calculateDeliveryFee,
+}: {
+  orderAmount: number;
+  calculateDeliveryFee: (orderAmount: number) => number;
+}) {
   return (
     <SummaryContainer>
       <DescriptionRow>
@@ -21,11 +27,11 @@ function OrderSummary({ orderAmount }: { orderAmount: number }) {
       <SummaryWrapper>
         <div id="summary-row">
           <h2>주문 금액</h2>
-          <p>{orderAmount}</p>
+          <p>{orderAmount.toLocaleString()}</p>
         </div>
         <div id="summary-row">
           <h2>배송비</h2>
-          <p>3,000원</p>
+          <p>{calculateDeliveryFee(orderAmount).toLocaleString()}원</p>
         </div>
       </SummaryWrapper>
       <SummaryWrapper>
