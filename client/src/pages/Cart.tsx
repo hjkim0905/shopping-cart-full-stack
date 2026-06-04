@@ -36,6 +36,8 @@ function Cart() {
     const item = cartProducts.find((product) => product.id === productId);
     if (!item) return;
 
+    const previous = [...cartProducts];
+
     const updated = { ...item, quantity: newQuantity };
     setCartProducts((prev) =>
       prev.map((product) => (product.id === productId ? updated : product)),
@@ -44,6 +46,7 @@ function Cart() {
     try {
       await updateCartProduct(updated);
     } catch (error) {
+      setCartProducts(previous);
       if (error instanceof Error) {
         console.error(error.message);
       }
@@ -104,6 +107,8 @@ function Cart() {
       .filter((product) => checkedIds.has(product.id))
       .reduce((sum, product) => sum + product.price, 0);
   };
+
+  // const calculateDeliveryFee = ()
 
   return (
     <PageContainer>
