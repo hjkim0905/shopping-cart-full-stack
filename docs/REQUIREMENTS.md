@@ -73,9 +73,9 @@
 
 ### 프로그래밍 요구사항
 
-- [ ] 상태관리
-  - [ ] useState / useReducer로 상태 구성하기
-  - [ ] 필요 시 Context API로
+- [x] 상태관리
+  - [x] useState / useReducer로 상태 구성하기
+  - [x] 필요 시 Context API로
   - [x] 결제 금액, 배송비는 선택 상태에서 파생 계산하고 별도로 저장하지 않는다.
 
 - [ ] 데이터 패칭 훅
