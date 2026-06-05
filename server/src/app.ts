@@ -4,7 +4,7 @@ import cartRouter from './routes/cart';
 
 const app = express();
 
-const ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:5173'];
+const ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:5173', 'https://hjkim0905.github.io'];
 
 app.use((req: Request, res: Response, next) => {
   const origin = req.headers.origin;
