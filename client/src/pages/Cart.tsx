@@ -65,7 +65,7 @@ function Cart() {
           const totalAmount = orderAmount + calculateDeliveryFee(orderAmount);
           const checkedProducts = cartProducts.filter((p) => checkedIds.has(p.id));
           const totalQuantity = checkedProducts.reduce((sum, p) => sum + p.quantity, 0);
-          navigate('/shopping-cart/confirm', {
+          navigate('/confirm', {
             state: {
               totalAmount,
               productCount: checkedIds.size,
