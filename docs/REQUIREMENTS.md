@@ -83,6 +83,6 @@
   - [x] useCart 데이터패칭 및 장바구니 비즈니스 로직
   - [x] useCartSelection 선택 상태 관리
 
-- [ ] 코드 품질
+- [x] 코드 품질
   - [x] 컴포넌트 / 비즈니스 로직 분리하기
-  - [ ] refetchCart, deleteCartItem 같은 세부 구현 노출하는 props를 금지하고 DIP를 적용하기
+  - [x] refetchCart, deleteCartItem 같은 세부 구현 노출하는 props를 금지하고 DIP를 적용하기
