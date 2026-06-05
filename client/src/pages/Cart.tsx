@@ -2,11 +2,11 @@ import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
 import Checkbox from '../components/ui/Checkbox';
-import type { CartItemType } from '../types/cartItemType';
 import CartItem from '../components/CartItem';
 import OrderSummary from '../components/OrderSummary';
 import { useCart } from '../hooks/useCart';
 import { useCartSelection } from '../hooks/useCartSelection';
+import { calculateOrderAmount, calculateDeliveryFee } from '../utils/cartCalculations';
 
 function Cart() {
   const navigate = useNavigate();
@@ -15,17 +15,6 @@ function Cart() {
   const { checkedIds, handleAllCheck, handleItemCheck } = useCartSelection(cartProducts, isLoading);
 
   const allChecked = cartProducts.length > 0 && checkedIds.size === cartProducts.length;
-
-  const calculateOrderAmount = (cartProducts: CartItemType[], checkedIds: Set<number>): number => {
-    return cartProducts
-      .filter((product) => checkedIds.has(product.id))
-      .reduce((sum, product) => sum + product.price * product.quantity, 0);
-  };
-
-  const calculateDeliveryFee = (orderAmount: number): number => {
-    if (orderAmount >= 100000 || orderAmount === 0) return 0;
-    else return 3000;
-  };
 
   return (
     <PageContainer>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { CartItemType } from '../types/cartItemType';
 
 export function useCartSelection(cartProducts: CartItemType[], isLoading: boolean) {
@@ -44,8 +44,9 @@ export function useCartSelection(cartProducts: CartItemType[], isLoading: boolea
     });
   };
 
-  const validCheckedIds = new Set(
-    [...checkedIds].filter((id) => cartProducts.some((p) => p.id === id)),
+  const validCheckedIds = useMemo(
+    () => new Set([...checkedIds].filter((id) => cartProducts.some((p) => p.id === id))),
+    [checkedIds, cartProducts],
   );
 
   return { checkedIds: validCheckedIds, handleAllCheck, handleItemCheck };
