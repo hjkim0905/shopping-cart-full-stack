@@ -29,7 +29,7 @@ function Cart() {
       </CartTitle>
       {isLoading ? (
         <LoadingContainer>
-          <Spinner />
+          <Spinner data-testid="spinner" />
         </LoadingContainer>
       ) : error ? (
         <ErrorContainer>
