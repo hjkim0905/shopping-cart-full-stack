@@ -31,8 +31,7 @@ jobs:
         working-directory: client
 
       - name: Build
-        run: |
-          npm run build || (cd client && npx tsc -p tsconfig.app.json)
+        run: npm run build
         working-directory: client
 
       - name: Setup Pages
