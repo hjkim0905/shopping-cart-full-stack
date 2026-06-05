@@ -78,9 +78,11 @@
   - [x] 필요 시 Context API로
   - [x] 결제 금액, 배송비는 선택 상태에서 파생 계산하고 별도로 저장하지 않는다.
 
-- [ ] 데이터 패칭 훅
-  - [ ] data, loading, error을 반환하는 커스텀 훅을 구현한다. (라이브러리 사용금지)
+- [x] 데이터 패칭 훅
+  - [x] data, loading, error을 반환하는 커스텀 훅을 구현한다. (라이브러리 사용금지)
+  - [x] useCart 데이터패칭 및 장바구니 비즈니스 로직
+  - [x] useCartSelection 선택 상태 관리
 
 - [ ] 코드 품질
-  - [ ] 컴포넌트 / 비즈니스 로직 분리하기
+  - [x] 컴포넌트 / 비즈니스 로직 분리하기
   - [ ] refetchCart, deleteCartItem 같은 세부 구현 노출하는 props를 금지하고 DIP를 적용하기

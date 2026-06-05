@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
@@ -6,108 +5,16 @@ import Checkbox from '../components/ui/Checkbox';
 import type { CartItemType } from '../types/cartItemType';
 import CartItem from '../components/CartItem';
 import OrderSummary from '../components/OrderSummary';
-import { deleteCartProduct, getCartProducts, updateCartProduct } from '../api/api';
+import { useCart } from '../hooks/useCart';
+import { useCartSelection } from '../hooks/useCartSelection';
 
 function Cart() {
   const navigate = useNavigate();
-  const [cartProducts, setCartProducts] = useState<CartItemType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [checkedIds, setCheckedIds] = useState<Set<number>>(() => {
-    const savedCheckedIds = localStorage.getItem('cart-checked');
-    return savedCheckedIds ? new Set(JSON.parse(savedCheckedIds)) : new Set();
-  });
 
-  useEffect(() => {
-    const fetchCart = async (): Promise<void> => {
-      setIsLoading(true);
-      try {
-        const responseData = await getCartProducts();
-        setCartProducts(responseData);
-
-        if (localStorage.getItem('cart-checked') === null) {
-          setCheckedIds(new Set(responseData.map((item) => item.id)));
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '장바구니를 불러오지 못했습니다.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCart();
-  }, []);
-
-  const handleQuantityChange = async (productId: number, newQuantity: number) => {
-    const item = cartProducts.find((product) => product.id === productId);
-    if (!item) return;
-
-    const previous = [...cartProducts];
-
-    if (newQuantity < 1 || newQuantity > 99) return;
-    const updated = { ...item, quantity: newQuantity };
-    setCartProducts((prev) =>
-      prev.map((product) => (product.id === productId ? updated : product)),
-    );
-
-    try {
-      await updateCartProduct(updated);
-    } catch (error) {
-      setCartProducts(previous);
-      if (error instanceof Error) {
-        console.error(error.message);
-      }
-    }
-  };
-
-  const deleteCartItem = async (productId: number): Promise<void> => {
-    try {
-      await deleteCartProduct(productId);
-      setCartProducts((prev) => prev.filter((product) => product.id !== productId));
-
-      setCheckedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(productId);
-        localStorage.setItem('cart-checked', JSON.stringify([...next]));
-        return next;
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      }
-    }
-  };
+  const { cartProducts, isLoading, error, handleQuantityChange, deleteCartItem } = useCart();
+  const { checkedIds, handleAllCheck, handleItemCheck } = useCartSelection(cartProducts, isLoading);
 
   const allChecked = cartProducts.length > 0 && checkedIds.size === cartProducts.length;
-
-  const handleAllCheck = (checked: boolean) => {
-    if (checked) {
-      const allIds = cartProducts.map((item) => item.id);
-      setCheckedIds(new Set(allIds));
-      localStorage.setItem('cart-checked', JSON.stringify([...allIds]));
-    } else {
-      setCheckedIds(new Set());
-      localStorage.removeItem('cart-checked');
-    }
-  };
-
-  const handleItemCheck = (id: number, checked: boolean) => {
-    setCheckedIds((prev) => {
-      const next = new Set(prev);
-      if (checked) {
-        next.add(id);
-        localStorage.setItem('cart-checked', JSON.stringify([...next]));
-      } else {
-        next.delete(id);
-        if (next.size === 0) {
-          localStorage.removeItem('cart-checked');
-        } else {
-          localStorage.setItem('cart-checked', JSON.stringify([...next]));
-        }
-      }
-      return next;
-    });
-  };
 
   const calculateOrderAmount = (cartProducts: CartItemType[], checkedIds: Set<number>): number => {
     return cartProducts
