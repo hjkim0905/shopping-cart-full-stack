@@ -9,7 +9,8 @@ interface OrderState {
 
 function ConfirmOrder() {
   const navigate = useNavigate();
-  const { state } = useLocation() as { state: OrderState };
+  const location = useLocation();
+  const state = location.state as OrderState;
 
   return (
     <PageContainer>

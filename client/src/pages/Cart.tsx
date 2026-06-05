@@ -202,7 +202,7 @@ const EmptyCart = styled.div`
   }
 `;
 
-const OrderConfirmButton = styled.button<{ disabled: boolean }>`
+const OrderConfirmButton = styled.button`
   position: fixed;
   bottom: 0;
   left: 50%;
