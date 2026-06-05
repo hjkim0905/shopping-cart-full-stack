@@ -55,7 +55,7 @@ function Cart() {
               item={item}
               checked={checkedIds.has(item.id)}
               onCheck={(checked) => handleItemCheck(item.id, checked)}
-              handleDelete={() => deleteCartItem(item.id)}
+              onDelete={() => deleteCartItem(item.id)}
               onQuantityChange={handleQuantityChange}
             />
           ))}
