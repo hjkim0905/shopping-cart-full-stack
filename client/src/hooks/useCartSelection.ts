@@ -12,19 +12,12 @@ function saveCheckedIds(ids: Set<number>): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]));
 }
 
-export function useCartSelection(cartProducts: CartItemType[], isLoading: boolean) {
+export function useCartSelection(cartProducts: CartItemType[]) {
   const [checkedIds, setCheckedIds] = useState<Set<number>>(() => {
     const saved = loadCheckedIds();
-    return saved !== null ? new Set(saved) : new Set();
+    if (saved !== null) return new Set(saved);
+    return new Set(cartProducts.map((p) => p.id));
   });
-  const [initialized, setInitialized] = useState(false);
-
-  if (!isLoading && !initialized && cartProducts.length > 0) {
-    if (loadCheckedIds() === null) {
-      setCheckedIds(new Set(cartProducts.map((p) => p.id)));
-    }
-    setInitialized(true);
-  }
 
   const handleAllCheck = (checked: boolean) => {
     if (checked) {

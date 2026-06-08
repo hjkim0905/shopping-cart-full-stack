@@ -1,23 +1,10 @@
 import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
-import { useNavigate } from 'react-router-dom';
-import Checkbox from '../components/ui/Checkbox';
-import CartItem from '../components/CartItem';
-import OrderSummary from '../components/OrderSummary';
 import { useCart } from '../hooks/useCart';
-import { useCartSelection } from '../hooks/useCartSelection';
-import { calculateOrderAmount, calculateDeliveryFee } from '../utils/cartCalculations';
+import CartContent from '../components/CartContent';
 
 function Cart() {
-  const navigate = useNavigate();
-
   const { cartProducts, isLoading, error, handleQuantityChange, deleteCartItem } = useCart();
-  const { checkedIds, handleAllCheck, handleItemCheck } = useCartSelection(cartProducts, isLoading);
-
-  const allChecked = cartProducts.length > 0 && checkedIds.size === cartProducts.length;
-  const orderAmount = calculateOrderAmount(cartProducts, checkedIds);
-  const deliveryFee = calculateDeliveryFee(orderAmount);
-  const totalAmount = orderAmount + deliveryFee;
 
   return (
     <PageContainer>
@@ -39,45 +26,16 @@ function Cart() {
           <p>{error}</p>
         </ErrorContainer>
       ) : cartProducts.length > 0 ? (
-        <CartList>
-          <Checkbox checked={allChecked} onChange={handleAllCheck} label="전체선택" />
-          {cartProducts.map((item) => (
-            <CartItem
-              key={item.id}
-              item={item}
-              checked={checkedIds.has(item.id)}
-              onCheck={(checked) => handleItemCheck(item.id, checked)}
-              onDelete={() => deleteCartItem(item.id)}
-              onQuantityChange={handleQuantityChange}
-            />
-          ))}
-        </CartList>
+        <CartContent
+          cartProducts={cartProducts}
+          handleQuantityChange={handleQuantityChange}
+          deleteCartItem={deleteCartItem}
+        />
       ) : (
         <EmptyCart>
           <p>장바구니에 담은 상품이 없습니다.</p>
         </EmptyCart>
       )}
-      <OrderSummary
-        orderAmount={orderAmount}
-        deliveryFee={deliveryFee}
-        totalAmount={totalAmount}
-      />
-      <OrderConfirmButton
-        disabled={checkedIds.size === 0}
-        onClick={() => {
-          const checkedProducts = cartProducts.filter((p) => checkedIds.has(p.id));
-          const totalQuantity = checkedProducts.reduce((sum, p) => sum + p.quantity, 0);
-          navigate('/confirm', {
-            state: {
-              totalAmount,
-              productCount: checkedIds.size,
-              totalQuantity,
-            },
-          });
-        }}
-      >
-        주문하기
-      </OrderConfirmButton>
     </PageContainer>
   );
 }
@@ -176,16 +134,6 @@ const ErrorContainer = styled.div`
   }
 `;
 
-const CartList = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  padding: 0 1.5rem 3.25rem 1.5rem;
-  flex: 1;
-  overflow-y: auto;
-`;
-
 const EmptyCart = styled.div`
   flex: 1;
   display: flex;
@@ -204,25 +152,3 @@ const EmptyCart = styled.div`
   }
 `;
 
-const OrderConfirmButton = styled.button`
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 580px;
-  height: 64px;
-  background-color: ${({ disabled }) => (disabled ? '#BEBEBE' : '#000000')};
-  color: #ffffff;
-  border: none;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-
-  font-family: Noto Sans;
-  font-weight: 700;
-  font-style: Bold;
-  font-size: 16px;
-  line-height: 16px;
-  letter-spacing: 0%;
-  text-align: center;
-  vertical-align: middle;
-`;
