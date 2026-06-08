@@ -35,9 +35,9 @@ export function useCart() {
 
     try {
       await updateCartProduct(updated);
-    } catch (err) {
+    } catch {
       setCartProducts(previous);
-      if (err instanceof Error) console.error(err.message);
+      alert('수량 변경에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -45,8 +45,8 @@ export function useCart() {
     try {
       await deleteCartProduct(productId);
       setCartProducts((prev) => prev.filter((product) => product.id !== productId));
-    } catch (err) {
-      if (err instanceof Error) console.error(err.message);
+    } catch {
+      alert('상품 삭제에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
