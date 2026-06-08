@@ -22,7 +22,7 @@ export function useCartSelection(cartProducts: CartItemType[], isLoading: boolea
       localStorage.setItem('cart-checked', JSON.stringify([...allIds]));
     } else {
       setCheckedIds(new Set());
-      localStorage.removeItem('cart-checked');
+      localStorage.setItem('cart-checked', JSON.stringify([]));
     }
   };
 
@@ -31,15 +31,10 @@ export function useCartSelection(cartProducts: CartItemType[], isLoading: boolea
       const next = new Set(prev);
       if (checked) {
         next.add(id);
-        localStorage.setItem('cart-checked', JSON.stringify([...next]));
       } else {
         next.delete(id);
-        if (next.size === 0) {
-          localStorage.removeItem('cart-checked');
-        } else {
-          localStorage.setItem('cart-checked', JSON.stringify([...next]));
-        }
       }
+      localStorage.setItem('cart-checked', JSON.stringify([...next]));
       return next;
     });
   };
