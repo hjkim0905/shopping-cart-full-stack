@@ -15,6 +15,9 @@ function Cart() {
   const { checkedIds, handleAllCheck, handleItemCheck } = useCartSelection(cartProducts, isLoading);
 
   const allChecked = cartProducts.length > 0 && checkedIds.size === cartProducts.length;
+  const orderAmount = calculateOrderAmount(cartProducts, checkedIds);
+  const deliveryFee = calculateDeliveryFee(orderAmount);
+  const totalAmount = orderAmount + deliveryFee;
 
   return (
     <PageContainer>
@@ -55,14 +58,13 @@ function Cart() {
         </EmptyCart>
       )}
       <OrderSummary
-        orderAmount={calculateOrderAmount(cartProducts, checkedIds)}
-        calculateDeliveryFee={calculateDeliveryFee}
+        orderAmount={orderAmount}
+        deliveryFee={deliveryFee}
+        totalAmount={totalAmount}
       />
       <OrderConfirmButton
         disabled={checkedIds.size === 0}
         onClick={() => {
-          const orderAmount = calculateOrderAmount(cartProducts, checkedIds);
-          const totalAmount = orderAmount + calculateDeliveryFee(orderAmount);
           const checkedProducts = cartProducts.filter((p) => checkedIds.has(p.id));
           const totalQuantity = checkedProducts.reduce((sum, p) => sum + p.quantity, 0);
           navigate('/confirm', {

@@ -2,14 +2,13 @@ import styled from '@emotion/styled';
 
 function OrderSummary({
   orderAmount,
-  calculateDeliveryFee,
+  deliveryFee,
+  totalAmount,
 }: {
   orderAmount: number;
-  calculateDeliveryFee: (orderAmount: number) => number;
+  deliveryFee: number;
+  totalAmount: number;
 }) {
-  const amount = orderAmount;
-  const deliveryFee = calculateDeliveryFee(amount);
-  const totalAmount = amount + deliveryFee;
 
   return (
     <SummaryContainer>
