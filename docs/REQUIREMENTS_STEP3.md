@@ -125,3 +125,85 @@ appliedCoupons: [...], // 적용된 쿠폰 id 배열
       appliedCoupons: [...],
       }
     ```
+
+---
+
+### 기능 구현 목록
+
+#### BE — 쿠폰 도메인
+
+- DB 초기 데이터 세팅
+  - `Coupon` 테이블 생성 (code, discountType, discountValue, minOrderAmount, expirationDate 등)
+  - 4종 쿠폰 시드 데이터 삽입 (FIXED5000 / BOGO / FREESHIPPING / MIRACLESALE)
+
+- 쿠폰 목록 조회 `GET /coupons`
+  - 전체 쿠폰 목록 반환
+  - 성공 시 200 OK
+
+- 주문 금액 계산 `POST /order/preview`
+  - Request: `{ selectedItemIds, coupons, isRemoteArea }`
+  - CartItem JOIN Product으로 price, quantity 조회
+  - 주문금액(orderAmount) 계산
+  - 쿠폰 할인금액(couponDiscount) 계산
+    - FIXED5000: 주문금액 ≥ 100,000원 시 5,000원 할인
+    - BOGO: 동일 상품 2개 이상 시 단가 높은 상품 1개 무료
+    - FREESHIPPING: 주문금액 ≥ 50,000원 시 배송비(도서산간 포함) 무료
+    - MIRACLESALE: 오전 4시~7시에만 전체 주문금액 30% 할인
+    - 최대 2개 쿠폰 조합 중 할인 효과가 가장 큰 조합 선택
+  - 배송비(deliveryFee) 계산
+    - 주문금액(쿠폰 적용 전) ≥ 100,000원이면 무료
+    - 주문금액 < 100,000원이면 3,000원
+    - isRemoteArea = true이면 3,000원 추가
+    - FREESHIPPING 쿠폰 적용 시 도서산간 추가 배송비 포함 전액 무료
+  - 총결제금액(totalPrice) = orderAmount - couponDiscount + deliveryFee
+  - 적용된 쿠폰 id 배열(appliedCoupons) 반환
+  - 성공 시 200 OK
+  - selectedItemIds가 비어있으면 400 Bad Request
+  - coupons 배열이 3개 이상이면 400 Bad Request
+
+---
+
+#### FE — 장바구니 페이지
+
+- 주문 금액 미리보기 연동
+  - 페이지 진입 시 `POST /order/preview` 호출 (`coupons: []`, `isRemoteArea: false`)
+  - 상품 선택/해제, 수량 변경 시 재호출하여 금액 즉시 갱신
+  - orderAmount, deliveryFee, totalPrice UI에 표시
+
+---
+
+#### FE — 주문확인 페이지
+
+- 페이지 진입 시 `POST /order/preview` 호출 (선택된 쿠폰 id 배열 포함)
+  - orderAmount, couponDiscount, deliveryFee, totalPrice 표시
+
+- 쿠폰 적용 UI
+  - `GET /coupons`로 사용 가능한 쿠폰 목록 표시
+  - 최대 2개 선택 가능, 3번째 선택 시 선택 불가 처리
+  - 쿠폰 선택/해제 시 `POST /order/preview` 재호출하여 할인금액 즉시 갱신
+  - 만료된 쿠폰 비활성화 표시
+  - MIRACLESALE 쿠폰은 오전 4시~7시 외 시간대에 비활성화 표시
+
+- 도서·산간지역 체크박스
+  - 체크 시 `isRemoteArea: true`로 `POST /order/preview` 재호출
+  - 배송비 변경 즉시 반영
+
+---
+
+#### FE — 공통
+
+- 상태 설계 (SSOT)
+  - 선택된 상품 id 배열, 선택된 쿠폰 id 배열, isRemoteArea를 원천 상태로 관리
+  - orderAmount, couponDiscount, deliveryFee, totalPrice는 서버 응답값 그대로 사용 (클라이언트 재계산 금지)
+
+---
+
+#### 설계 문서
+
+- `docs/system-design.md` 작성
+  - SSOT 설계 근거 설명
+  - 시퀀스 다이어그램 (FE / BE / DB 3 참여자)
+
+- `docs/api.md` 업데이트
+  - `GET /coupons` 명세 추가
+  - `POST /order/preview` 명세 추가 (Request / Response / Status Code)
