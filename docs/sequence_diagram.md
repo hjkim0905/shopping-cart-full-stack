@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
 actor FE as FE (브라우저)
 participant BE as BE (서버)
@@ -70,3 +71,4 @@ participant DB as DB (CartItem / Product)
 
         BE-->>FE: { orderAmount, couponDiscount, deliveryFee, totalPrice, appliedCoupons: [1,2] }
     end
+```
