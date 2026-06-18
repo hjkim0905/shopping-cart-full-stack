@@ -7,7 +7,7 @@ interface OrderState {
   totalQuantity: number;
 }
 
-function ConfirmOrder() {
+function ConfirmPayment() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as OrderState;
@@ -31,7 +31,7 @@ function ConfirmOrder() {
         </button>
       </Banner>
       <ContentArea>
-        <h1 id="order-title">주문 확인</h1>
+        <h1 id="order-title">결제 확인</h1>
         <p id="order-summary">
           총 {state.productCount}종류의 상품 {state.totalQuantity}개를 주문합니다.
           <br />
@@ -45,7 +45,7 @@ function ConfirmOrder() {
   );
 }
 
-export default ConfirmOrder;
+export default ConfirmPayment;
 
 const PageContainer = styled.div`
   height: 100vh;
