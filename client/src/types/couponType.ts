@@ -18,6 +18,8 @@ export interface OrderPreviewResponse {
   orderAmount: number;
   couponDiscount: number;
   deliveryFee: number;
+  // 쿠폰 미적용 기준 배송비 (FREESHIPPING 절감액 표시용)
+  originalDeliveryFee: number;
   totalPrice: number;
   appliedCoupons: number[];
 }

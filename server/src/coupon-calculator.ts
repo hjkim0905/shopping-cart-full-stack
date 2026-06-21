@@ -15,6 +15,8 @@ export interface OrderPreviewResult {
   orderAmount: number;
   couponDiscount: number;
   deliveryFee: number;
+  // 쿠폰 미적용 기준 배송비. FREESHIPPING의 배송비 절감액을 화면에서 표시하기 위해 사용한다.
+  originalDeliveryFee: number;
   totalPrice: number;
   appliedCoupons: number[];
 }
@@ -32,9 +34,10 @@ const MIRACLESALE_END_HOUR = 7;
 const sumOrderAmount = (items: CartItem[]): number =>
   items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-// BOGO: 동일 상품 2개 이상 구매 시 추가 1개 무료, 단가가 가장 높은 상품에 적용.
+// BOGO(2+1): 동일 상품 3개 구매 시 1개 무료. 단가가 가장 높은 상품에 적용.
+const BOGO_REQUIRED_QUANTITY = 3;
 const bogoDiscount = (items: CartItem[]): number => {
-  const eligible = items.filter((item) => item.quantity >= 2);
+  const eligible = items.filter((item) => item.quantity >= BOGO_REQUIRED_QUANTITY);
   if (eligible.length === 0) return 0;
   return Math.max(...eligible.map((item) => item.price));
 };
@@ -132,6 +135,8 @@ export const calculateOrderPreview = (
   now: Date = new Date(),
 ): OrderPreviewResult => {
   const orderAmount = sumOrderAmount(items);
+  // 쿠폰 미적용 기준 배송비 (FREESHIPPING 절감액 표시용)
+  const originalDeliveryFee = calculateDeliveryFee(orderAmount, isRemoteArea, false);
 
   let best: OrderPreviewResult | null = null;
 
@@ -146,7 +151,14 @@ export const calculateOrderPreview = (
     const totalPrice = orderAmount - couponDiscount + deliveryFee;
 
     if (best === null || totalPrice < best.totalPrice) {
-      best = { orderAmount, couponDiscount, deliveryFee, totalPrice, appliedCoupons };
+      best = {
+        orderAmount,
+        couponDiscount,
+        deliveryFee,
+        originalDeliveryFee,
+        totalPrice,
+        appliedCoupons,
+      };
     }
   }
 

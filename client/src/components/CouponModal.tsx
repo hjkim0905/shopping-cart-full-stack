@@ -3,6 +3,8 @@ import Checkbox from './ui/Checkbox';
 import type { Coupon, CouponType } from '../types/couponType';
 
 const MAX_SELECTABLE = 2;
+const MIRACLESALE_START_HOUR = 4;
+const MIRACLESALE_END_HOUR = 7;
 
 const COUPON_CONDITION: Record<CouponType, string> = {
   FIXED5000: '최소 주문 금액: 100,000원',
@@ -10,6 +12,15 @@ const COUPON_CONDITION: Record<CouponType, string> = {
   FREESHIPPING: '최소 주문 금액: 50,000원',
   MIRACLESALE: '사용 가능 시간: 오전 4시부터 7시까지',
 };
+
+// MIRACLESALE은 오전 4~7시에만 사용 가능하다. 그 외 시간엔 선택을 막는다.
+const isMiracleTime = (): boolean => {
+  const hour = new Date().getHours();
+  return hour >= MIRACLESALE_START_HOUR && hour < MIRACLESALE_END_HOUR;
+};
+
+const isTimeRestricted = (type: CouponType): boolean =>
+  type === 'MIRACLESALE' && !isMiracleTime();
 
 interface CouponModalProps {
   coupons: Coupon[];
@@ -72,7 +83,8 @@ function CouponModal({
         <CouponList>
           {coupons.map((coupon) => {
             const checked = selectedIds.includes(coupon.id);
-            const disabled = !checked && isAtLimit;
+            const timeRestricted = isTimeRestricted(coupon.type);
+            const disabled = timeRestricted || (!checked && isAtLimit);
             const condition = COUPON_CONDITION[coupon.type];
 
             return (
@@ -88,6 +100,9 @@ function CouponModal({
                 <CouponMeta>
                   <p>만료일: {coupon.expirationDate}</p>
                   {condition && <p>{condition}</p>}
+                  {timeRestricted && (
+                    <p id="time-restricted">지금은 사용 가능 시간이 아닙니다.</p>
+                  )}
                 </CouponMeta>
               </CouponItem>
             );
@@ -213,6 +228,10 @@ const CouponMeta = styled.div`
     line-height: 15px;
     letter-spacing: 0%;
     color: #00000099;
+  }
+
+  #time-restricted {
+    color: #d32f2f;
   }
 `;
 
