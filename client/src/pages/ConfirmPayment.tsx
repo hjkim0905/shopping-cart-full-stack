@@ -33,14 +33,14 @@ function ConfirmPayment() {
       <ContentArea>
         <h1 id="order-title">결제 확인</h1>
         <p id="order-summary">
-          총 {state.productCount}종류의 상품 {state.totalQuantity}개를 주문합니다.
+          총 {state.productCount}종류의 상품 {state.totalQuantity}개를 주문했습니다.
           <br />
           최종 결제 금액을 확인해 주세요.
         </p>
         <h3 id="total-title">총 결제 금액</h3>
         <p id="total-amount">{state.totalAmount.toLocaleString()}원</p>
       </ContentArea>
-      <ConfirmButton disabled>결제하기</ConfirmButton>
+      <ConfirmButton onClick={() => navigate('/')}>장바구니로 돌아가기</ConfirmButton>
     </PageContainer>
   );
 }
@@ -133,10 +133,10 @@ const ConfirmButton = styled.button`
   width: 100%;
   max-width: 580px;
   height: 64px;
-  background-color: #bebebe;
+  background-color: #000000;
   color: #ffffff;
   border: none;
-  cursor: not-allowed;
+  cursor: pointer;
 
   font-family: Noto Sans;
   font-weight: 700;

@@ -1,8 +1,11 @@
 import styled from '@emotion/styled';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Checkbox from '../components/ui/Checkbox';
+import CouponModal from '../components/CouponModal';
+import { getCoupons, getOrderPreview } from '../api/coupon';
 import type { CartItemType } from '../types/cartItemType';
+import type { Coupon, OrderPreviewResponse } from '../types/couponType';
 
 interface OrderConfirmState {
   products: CartItemType[];
@@ -12,17 +15,91 @@ interface OrderConfirmState {
   totalAmount: number;
 }
 
-const REMOTE_AREA_DELIVERY_FEE = 3000;
-
 function OrderConfirm() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as OrderConfirmState;
 
-  const [isRemoteArea, setIsRemoteArea] = useState(false);
+  const selectedItemIds = state.products.map((p) => p.id);
 
-  const deliveryFee = state.deliveryFee + (isRemoteArea ? REMOTE_AREA_DELIVERY_FEE : 0);
-  const totalAmount = state.orderAmount - state.couponDiscount + deliveryFee;
+  const [isRemoteArea, setIsRemoteArea] = useState(false);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [appliedCouponIds, setAppliedCouponIds] = useState<number[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [draftCouponIds, setDraftCouponIds] = useState<number[]>([]);
+  const [draftDiscount, setDraftDiscount] = useState(0);
+  const [preview, setPreview] = useState<OrderPreviewResponse>({
+    orderAmount: state.orderAmount,
+    couponDiscount: state.couponDiscount,
+    deliveryFee: state.deliveryFee,
+    totalPrice: state.totalAmount,
+    appliedCoupons: [],
+  });
+
+  // 서버가 모든 금액 계산의 단일 소스 — 선택/배송조건이 바뀌면 미리보기를 다시 요청한다.
+  const fetchPreview = useCallback(
+    async (couponIds: number[]) => {
+      return getOrderPreview({
+        selectedItemIds,
+        coupons: couponIds,
+        isRemoteArea,
+      });
+    },
+    [selectedItemIds, isRemoteArea],
+  );
+
+  useEffect(() => {
+    getCoupons()
+      .then(setCoupons)
+      .catch((error) => console.error(error));
+  }, []);
+
+  useEffect(() => {
+    fetchPreview(appliedCouponIds)
+      .then((result) => {
+        setPreview(result);
+        // 서버가 실제 적용한 쿠폰만 반영 (조건 미충족 쿠폰 제외)
+        setAppliedCouponIds(result.appliedCoupons);
+      })
+      .catch((error) => console.error(error));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRemoteArea]);
+
+  const openModal = () => {
+    setDraftCouponIds(appliedCouponIds);
+    setIsModalOpen(true);
+  };
+
+  // 모달에서 선택이 바뀔 때마다 서버에 할인액을 물어본다.
+  useEffect(() => {
+    if (!isModalOpen) return;
+    fetchPreview(draftCouponIds)
+      .then((result) => setDraftDiscount(result.couponDiscount))
+      .catch((error) => console.error(error));
+  }, [isModalOpen, draftCouponIds, fetchPreview]);
+
+  const toggleDraftCoupon = (id: number) => {
+    setDraftCouponIds((prev) =>
+      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
+    );
+  };
+
+  const applyCoupons = async () => {
+    const result = await fetchPreview(draftCouponIds);
+    setPreview(result);
+    setAppliedCouponIds(result.appliedCoupons);
+    setIsModalOpen(false);
+  };
+
+  const goToConfirm = () => {
+    navigate('/confirm', {
+      state: {
+        totalAmount: preview.totalPrice,
+        productCount: state.products.length,
+        totalQuantity: state.products.reduce((sum, p) => sum + p.quantity, 0),
+      },
+    });
+  };
 
   return (
     <PageContainer>
@@ -67,7 +144,7 @@ function OrderConfirm() {
           ))}
         </ProductList>
 
-        <CouponButton>쿠폰 적용</CouponButton>
+        <CouponButton onClick={openModal}>쿠폰 적용</CouponButton>
 
         <DeliverySection>
           <h2 id="delivery-title">배송 정보</h2>
@@ -97,27 +174,38 @@ function OrderConfirm() {
         <SummaryWrapper>
           <div id="summary-row">
             <h2>주문 금액</h2>
-            <p>{state.orderAmount.toLocaleString()}원</p>
+            <p>{preview.orderAmount.toLocaleString()}원</p>
           </div>
           <div id="summary-row">
             <h2>쿠폰 할인 금액</h2>
-            <p>-{state.couponDiscount.toLocaleString()}원</p>
+            <p>-{preview.couponDiscount.toLocaleString()}원</p>
           </div>
           <div id="summary-row">
             <h2>배송비</h2>
-            <p>{deliveryFee.toLocaleString()}원</p>
+            <p>{preview.deliveryFee.toLocaleString()}원</p>
           </div>
         </SummaryWrapper>
 
         <SummaryWrapper>
           <div id="summary-row">
             <h2>총 결제 금액</h2>
-            <p>{totalAmount.toLocaleString()}원</p>
+            <p>{preview.totalPrice.toLocaleString()}원</p>
           </div>
         </SummaryWrapper>
       </ContentArea>
 
-      <PaymentButton>결제하기</PaymentButton>
+      <PaymentButton onClick={goToConfirm}>결제하기</PaymentButton>
+
+      {isModalOpen && (
+        <CouponModal
+          coupons={coupons}
+          selectedIds={draftCouponIds}
+          discount={draftDiscount}
+          onToggle={toggleDraftCoupon}
+          onClose={() => setIsModalOpen(false)}
+          onApply={applyCoupons}
+        />
+      )}
     </PageContainer>
   );
 }
