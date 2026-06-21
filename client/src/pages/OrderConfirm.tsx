@@ -35,6 +35,7 @@ function OrderConfirm() {
     originalDeliveryFee: state.deliveryFee,
     totalPrice: state.totalAmount,
     appliedCoupons: [],
+    couponStatuses: [],
   });
 
   // 서버가 모든 금액 계산의 단일 소스 — 선택/배송조건이 바뀌면 미리보기를 다시 요청한다.
@@ -223,6 +224,7 @@ function OrderConfirm() {
       {isModalOpen && (
         <CouponModal
           coupons={coupons}
+          couponStatuses={preview.couponStatuses}
           selectedIds={draftCouponIds}
           discount={draftDiscount}
           onToggle={toggleDraftCoupon}

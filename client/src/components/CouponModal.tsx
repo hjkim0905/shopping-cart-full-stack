@@ -1,29 +1,27 @@
 import styled from '@emotion/styled';
 import Checkbox from './ui/Checkbox';
-import type { Coupon, CouponType } from '../types/couponType';
+import type { Coupon, CouponStatus, CouponType } from '../types/couponType';
 
 const MAX_SELECTABLE = 2;
-const MIRACLESALE_START_HOUR = 4;
-const MIRACLESALE_END_HOUR = 7;
 
 const COUPON_CONDITION: Record<CouponType, string> = {
   FIXED5000: '최소 주문 금액: 100,000원',
-  BOGO: '',
+  BOGO: '동일 상품 3개 구매 시 1개 무료',
   FREESHIPPING: '최소 주문 금액: 50,000원',
   MIRACLESALE: '사용 가능 시간: 오전 4시부터 7시까지',
 };
 
-// MIRACLESALE은 오전 4~7시에만 사용 가능하다. 그 외 시간엔 선택을 막는다.
-const isMiracleTime = (): boolean => {
-  const hour = new Date().getHours();
-  return hour >= MIRACLESALE_START_HOUR && hour < MIRACLESALE_END_HOUR;
+// 사용 불가 사유 안내 문구 (서버가 applicable=false로 내려준 쿠폰에 표시)
+const COUPON_UNAVAILABLE: Record<CouponType, string> = {
+  FIXED5000: '최소 주문 금액을 충족하지 않습니다.',
+  BOGO: '동일 상품을 3개 이상 담아야 사용할 수 있습니다.',
+  FREESHIPPING: '지금은 사용할 수 없는 쿠폰입니다.',
+  MIRACLESALE: '지금은 사용 가능 시간이 아닙니다.',
 };
-
-const isTimeRestricted = (type: CouponType): boolean =>
-  type === 'MIRACLESALE' && !isMiracleTime();
 
 interface CouponModalProps {
   coupons: Coupon[];
+  couponStatuses: CouponStatus[];
   selectedIds: number[];
   discount: number;
   onToggle: (id: number) => void;
@@ -33,6 +31,7 @@ interface CouponModalProps {
 
 function CouponModal({
   coupons,
+  couponStatuses,
   selectedIds,
   discount,
   onToggle,
@@ -40,6 +39,8 @@ function CouponModal({
   onApply,
 }: CouponModalProps) {
   const isAtLimit = selectedIds.length >= MAX_SELECTABLE;
+  const isApplicable = (id: number): boolean =>
+    couponStatuses.find((status) => status.id === id)?.applicable ?? true;
 
   return (
     <Dim onClick={onClose}>
@@ -83,8 +84,8 @@ function CouponModal({
         <CouponList>
           {coupons.map((coupon) => {
             const checked = selectedIds.includes(coupon.id);
-            const timeRestricted = isTimeRestricted(coupon.type);
-            const disabled = timeRestricted || (!checked && isAtLimit);
+            const applicable = isApplicable(coupon.id);
+            const disabled = !applicable || (!checked && isAtLimit);
             const condition = COUPON_CONDITION[coupon.type];
 
             return (
@@ -100,8 +101,8 @@ function CouponModal({
                 <CouponMeta>
                   <p>만료일: {coupon.expirationDate}</p>
                   {condition && <p>{condition}</p>}
-                  {timeRestricted && (
-                    <p id="time-restricted">지금은 사용 가능 시간이 아닙니다.</p>
+                  {!applicable && (
+                    <p id="unavailable">{COUPON_UNAVAILABLE[coupon.type]}</p>
                   )}
                 </CouponMeta>
               </CouponItem>
@@ -230,7 +231,7 @@ const CouponMeta = styled.div`
     color: #00000099;
   }
 
-  #time-restricted {
+  #unavailable {
     color: #d32f2f;
   }
 `;

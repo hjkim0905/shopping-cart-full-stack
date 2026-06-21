@@ -14,6 +14,11 @@ export interface OrderPreviewRequest {
   isRemoteArea: boolean;
 }
 
+export interface CouponStatus {
+  id: number;
+  applicable: boolean;
+}
+
 export interface OrderPreviewResponse {
   orderAmount: number;
   couponDiscount: number;
@@ -22,4 +27,6 @@ export interface OrderPreviewResponse {
   originalDeliveryFee: number;
   totalPrice: number;
   appliedCoupons: number[];
+  // 각 쿠폰의 현재 사용 가능 여부 (모달 disabled 판정용)
+  couponStatuses: CouponStatus[];
 }

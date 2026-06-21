@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { DB } from '../database';
-import { calculateOrderPreview } from '../coupon-calculator';
+import { calculateOrderPreview, isCouponApplicable } from '../coupon-calculator';
 
 const orderRouter = express.Router();
 orderRouter.use(express.json());
@@ -27,11 +27,22 @@ orderRouter.post('/preview', (req: Request, res: Response) => {
   }
 
   const items = DB.Cart.filter((item) => selectedItemIds.includes(item.id));
-  const candidates = isAutoOptimize
-    ? DB.Coupons
-    : DB.Coupons.filter((coupon) => coupons.includes(coupon.id));
+  const orderAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const result = calculateOrderPreview(items, candidates, Boolean(isRemoteArea));
+  // 조건 미충족 쿠폰은 후보에서 제외해 자동 선택/적용되지 않도록 한다.
+  const applicableCoupons = DB.Coupons.filter((coupon) =>
+    isCouponApplicable(coupon.type, items, orderAmount),
+  );
+  const candidates = isAutoOptimize
+    ? applicableCoupons
+    : applicableCoupons.filter((coupon) => coupons.includes(coupon.id));
+
+  const result = calculateOrderPreview(
+    items,
+    candidates,
+    Boolean(isRemoteArea),
+    DB.Coupons,
+  );
   res.status(200).json(result);
 });
 

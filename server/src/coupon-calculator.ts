@@ -11,6 +11,11 @@ export interface Coupon {
   type: CouponType;
 }
 
+export interface CouponStatus {
+  id: number;
+  applicable: boolean;
+}
+
 export interface OrderPreviewResult {
   orderAmount: number;
   couponDiscount: number;
@@ -19,6 +24,8 @@ export interface OrderPreviewResult {
   originalDeliveryFee: number;
   totalPrice: number;
   appliedCoupons: number[];
+  // 각 쿠폰의 현재 사용 가능 여부 (조건 미충족 시 모달에서 선택 차단)
+  couponStatuses: CouponStatus[];
 }
 
 const DEFAULT_DELIVERY_FEE = 3000;
@@ -45,6 +52,28 @@ const bogoDiscount = (items: CartItem[]): number => {
 const isMiracleTime = (now: Date): boolean => {
   const hour = now.getHours();
   return hour >= MIRACLESALE_START_HOUR && hour < MIRACLESALE_END_HOUR;
+};
+
+// 쿠폰별 현재 사용 가능 여부. 조건 미충족 시 모달에서 선택을 막기 위해 사용한다.
+export const isCouponApplicable = (
+  type: CouponType,
+  items: CartItem[],
+  orderAmount: number,
+  now: Date = new Date(),
+): boolean => {
+  switch (type) {
+    case 'FIXED5000':
+      return orderAmount >= FIXED5000_MIN_AMOUNT;
+    case 'BOGO':
+      return items.some((item) => item.quantity >= BOGO_REQUIRED_QUANTITY);
+    case 'FREESHIPPING':
+      // 50,000원 미만은 자격 미달, 100,000원 이상은 이미 기본 무료배송이라 무의미.
+      return orderAmount >= FREESHIPPING_MIN_AMOUNT && orderAmount < FREE_DELIVERY_THRESHOLD;
+    case 'MIRACLESALE':
+      return isMiracleTime(now);
+    default:
+      return false;
+  }
 };
 
 interface ComboResult {
@@ -132,11 +161,18 @@ export const calculateOrderPreview = (
   items: CartItem[],
   candidates: Coupon[],
   isRemoteArea: boolean,
+  allCoupons: Coupon[] = candidates,
   now: Date = new Date(),
 ): OrderPreviewResult => {
   const orderAmount = sumOrderAmount(items);
   // 쿠폰 미적용 기준 배송비 (FREESHIPPING 절감액 표시용)
   const originalDeliveryFee = calculateDeliveryFee(orderAmount, isRemoteArea, false);
+
+  // 전체 쿠폰 기준 사용 가능 여부 (모달의 disabled 판정용)
+  const couponStatuses = allCoupons.map((coupon) => ({
+    id: coupon.id,
+    applicable: isCouponApplicable(coupon.type, items, orderAmount, now),
+  }));
 
   let best: OrderPreviewResult | null = null;
 
@@ -158,6 +194,7 @@ export const calculateOrderPreview = (
         originalDeliveryFee,
         totalPrice,
         appliedCoupons,
+        couponStatuses,
       };
     }
   }
