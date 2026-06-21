@@ -37,8 +37,9 @@ function OrderConfirm() {
   });
 
   // 서버가 모든 금액 계산의 단일 소스 — 선택/배송조건이 바뀌면 미리보기를 다시 요청한다.
+  // couponIds 생략 시 서버가 전체 쿠폰 중 최적 조합을 자동 선택한다.
   const fetchPreview = useCallback(
-    async (couponIds: number[]) => {
+    async (couponIds?: number[]) => {
       return getOrderPreview({
         selectedItemIds,
         coupons: couponIds,
@@ -54,13 +55,21 @@ function OrderConfirm() {
       .catch((error) => console.error(error));
   }, []);
 
+  // 진입 시 1회: 쿠폰 미지정으로 요청해 서버가 고른 최적 조합을 초기 선택으로 적용한다.
   useEffect(() => {
-    fetchPreview(appliedCouponIds)
+    fetchPreview(undefined)
       .then((result) => {
         setPreview(result);
-        // 서버가 실제 적용한 쿠폰만 반영 (조건 미충족 쿠폰 제외)
         setAppliedCouponIds(result.appliedCoupons);
       })
+      .catch((error) => console.error(error));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 배송 조건이 바뀌면 현재 적용된 쿠폰을 유지한 채 금액만 다시 계산한다.
+  useEffect(() => {
+    fetchPreview(appliedCouponIds)
+      .then(setPreview)
       .catch((error) => console.error(error));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRemoteArea]);

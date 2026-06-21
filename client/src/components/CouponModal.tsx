@@ -186,6 +186,17 @@ const CouponItem = styled.div<{ disabled: boolean }>`
   border-bottom: 1px solid #0000001a;
   opacity: ${({ disabled }) => (disabled ? 0.35 : 1)};
   transition: opacity 150ms ease;
+
+  /* 쿠폰 이름(Checkbox label) 폰트 강조 */
+  span {
+    font-family: Noto Sans KR;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+  }
 `;
 
 const CouponMeta = styled.div`

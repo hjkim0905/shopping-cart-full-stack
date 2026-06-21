@@ -9,7 +9,8 @@ export interface Coupon {
 
 export interface OrderPreviewRequest {
   selectedItemIds: number[];
-  coupons: number[];
+  // 생략하면 서버가 전체 쿠폰 중 최적 조합을 자동 선택한다.
+  coupons?: number[];
   isRemoteArea: boolean;
 }
 
