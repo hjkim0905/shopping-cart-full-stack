@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import Checkbox from './ui/Checkbox';
 import CartItem from './CartItem';
@@ -13,6 +14,7 @@ interface CartContentProps {
 }
 
 function CartContent({ cartProducts, handleQuantityChange, deleteCartItem }: CartContentProps) {
+  const navigate = useNavigate();
   const { checkedIds, handleAllCheck, handleItemCheck } = useCartSelection(cartProducts);
 
   const allChecked = cartProducts.length > 0 && checkedIds.size === cartProducts.length;
@@ -39,16 +41,16 @@ function CartContent({ cartProducts, handleQuantityChange, deleteCartItem }: Car
       <OrderConfirmButton
         disabled={checkedIds.size === 0}
         onClick={() => {
-          // 결제 확인 페이지는 마지막 단계라 라우터 연결을 임시로 끊어둠
-          // const checkedProducts = cartProducts.filter((p) => checkedIds.has(p.id));
-          // const totalQuantity = checkedProducts.reduce((sum, p) => sum + p.quantity, 0);
-          // navigate('/confirm', {
-          //   state: {
-          //     totalAmount,
-          //     productCount: checkedIds.size,
-          //     totalQuantity,
-          //   },
-          // });
+          const checkedProducts = cartProducts.filter((p) => checkedIds.has(p.id));
+          navigate('/order', {
+            state: {
+              products: checkedProducts,
+              orderAmount,
+              couponDiscount: 0,
+              deliveryFee,
+              totalAmount,
+            },
+          });
         }}
       >
         주문하기
