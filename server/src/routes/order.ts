@@ -28,7 +28,7 @@ orderRouter.post('/preview', (req: Request, res: Response) => {
   const orderAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const applicableCoupons = DB.Coupons.filter((coupon) =>
-    isCouponApplicable(coupon.type, items, orderAmount),
+    isCouponApplicable(coupon.type, items, orderAmount, coupon.expirationDate),
   );
   const candidates = mode === 'auto'
     ? applicableCoupons

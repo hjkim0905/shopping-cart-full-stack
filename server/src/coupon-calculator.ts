@@ -9,6 +9,7 @@ export interface CartItem {
 export interface Coupon {
   id: number;
   type: CouponType;
+  expirationDate: string;
 }
 
 export interface CouponStatus {
@@ -57,8 +58,11 @@ export const isCouponApplicable = (
   type: CouponType,
   items: CartItem[],
   orderAmount: number,
+  expirationDate: string,
   now: Date = new Date(),
 ): boolean => {
+  if (new Date(expirationDate) < now) return false;
+
   switch (type) {
     case 'FIXED5000':
       return orderAmount >= FIXED5000_MIN_AMOUNT;
@@ -167,7 +171,7 @@ export const calculateOrderPreview = (
 
   const couponStatuses = allCoupons.map((coupon) => ({
     id: coupon.id,
-    applicable: isCouponApplicable(coupon.type, items, orderAmount, now),
+    applicable: isCouponApplicable(coupon.type, items, orderAmount, coupon.expirationDate, now),
   }));
 
   let best: OrderPreviewResult | null = null;
