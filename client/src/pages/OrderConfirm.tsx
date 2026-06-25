@@ -38,8 +38,6 @@ function OrderConfirm() {
     couponStatuses: [],
   });
 
-  // 서버가 모든 금액 계산의 단일 소스 — 선택/배송조건이 바뀌면 미리보기를 다시 요청한다.
-  // couponIds 생략 시 서버가 전체 쿠폰 중 최적 조합을 자동 선택한다.
   const fetchPreview = useCallback(
     async (couponIds?: number[]) => {
       return getOrderPreview({
@@ -59,7 +57,6 @@ function OrderConfirm() {
 
   const isInitialized = useRef(false);
 
-  // 진입 시 1회: 쿠폰 미지정으로 요청해 서버가 고른 최적 조합을 초기 선택으로 적용한다.
   useEffect(() => {
     fetchPreview(undefined)
       .then((result) => {
@@ -71,8 +68,8 @@ function OrderConfirm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 배송 조건이 바뀌면 현재 적용된 쿠폰을 유지한 채 금액만 다시 계산한다.
-  // 진입 직후 초기화 effect와 경쟁하지 않도록 첫 발화는 건너뛴다.
+  // isRemoteArea가 바뀌면 현재 쿠폰을 유지한 채 금액을 다시 계산한다.
+  // isInitialized 가드는 진입 직후 초기화 effect와의 경쟁을 막는다.
   useEffect(() => {
     if (!isInitialized.current) return;
     fetchPreview(appliedCouponIds)
@@ -86,9 +83,7 @@ function OrderConfirm() {
     setIsModalOpen(true);
   };
 
-  // 모달에서 선택이 바뀔 때마다 서버에 할인액을 물어본다.
-  // FREESHIPPING처럼 상품 할인 없이 배송비만 줄이는 쿠폰도 이득으로 보이도록
-  // 배송비 절감액(쿠폰 미적용 기준 대비)을 할인액에 합산한다.
+  // FREESHIPPING처럼 배송비만 줄이는 쿠폰도 할인으로 보이도록 배송비 절감액을 합산한다.
   useEffect(() => {
     if (!isModalOpen) return;
     fetchPreview(draftCouponIds)
@@ -122,7 +117,6 @@ function OrderConfirm() {
     });
   };
 
-  // 배송비 절감액을 쿠폰 할인으로 표시한다. (배송비 행은 쿠폰 미적용 기준값을 표시)
   const deliverySaving = preview.originalDeliveryFee - preview.deliveryFee;
   const displayDiscount = preview.couponDiscount + deliverySaving;
 

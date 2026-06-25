@@ -21,7 +21,6 @@ interface DB {
   Coupons: Coupon[];
 }
 
-// 쿠폰은 등록/수정/삭제 API 없이 하드코딩으로만 관리한다. (읽기 전용)
 const COUPONS: Coupon[] = [
   { id: 1, name: '5,000원 할인 쿠폰', type: 'FIXED5000', expirationDate: '2026-11-30' },
   { id: 2, name: '2개 구매 시 1개 무료 쿠폰', type: 'BOGO', expirationDate: '2026-06-30' },

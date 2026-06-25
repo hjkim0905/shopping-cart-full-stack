@@ -3,7 +3,6 @@ import { DB } from '../database';
 
 const couponRouter = express.Router();
 
-// 쿠폰 목록 조회 (하드코딩된 읽기 전용 목록)
 couponRouter.get('/', (req: Request, res: Response) => {
   if (!DB.Coupons) {
     return res.status(500).json({ errorMessage: '서버에 일시적인 오류가 발생했습니다.' });

@@ -7,7 +7,6 @@ orderRouter.use(express.json());
 
 const MAX_COUPONS = 2;
 
-// 주문 금액 계산 (미리보기). 쿠폰/장바구니를 변형하지 않는 읽기 전용 계산.
 orderRouter.post('/preview', (req: Request, res: Response) => {
   if (!DB.Cart || !DB.Coupons) {
     return res.status(500).json({ errorMessage: '서버에 일시적인 오류가 발생했습니다.' });

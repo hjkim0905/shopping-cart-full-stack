@@ -11,7 +11,6 @@ const COUPON_CONDITION: Record<CouponType, string> = {
   MIRACLESALE: '사용 가능 시간: 오전 4시부터 7시까지',
 };
 
-// 사용 불가 사유 안내 문구 (서버가 applicable=false로 내려준 쿠폰에 표시)
 const COUPON_UNAVAILABLE: Record<CouponType, string> = {
   FIXED5000: '최소 주문 금액을 충족하지 않습니다.',
   BOGO: '동일 상품을 3개 이상 담아야 사용할 수 있습니다.',

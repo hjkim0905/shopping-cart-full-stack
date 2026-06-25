@@ -20,11 +20,9 @@ export interface OrderPreviewResult {
   orderAmount: number;
   couponDiscount: number;
   deliveryFee: number;
-  // 쿠폰 미적용 기준 배송비. FREESHIPPING의 배송비 절감액을 화면에서 표시하기 위해 사용한다.
   originalDeliveryFee: number;
   totalPrice: number;
   appliedCoupons: number[];
-  // 각 쿠폰의 현재 사용 가능 여부 (조건 미충족 시 모달에서 선택 차단)
   couponStatuses: CouponStatus[];
 }
 
@@ -165,10 +163,8 @@ export const calculateOrderPreview = (
   now: Date = new Date(),
 ): OrderPreviewResult => {
   const orderAmount = sumOrderAmount(items);
-  // 쿠폰 미적용 기준 배송비 (FREESHIPPING 절감액 표시용)
   const originalDeliveryFee = calculateDeliveryFee(orderAmount, isRemoteArea, false);
 
-  // 전체 쿠폰 기준 사용 가능 여부 (모달의 disabled 판정용)
   const couponStatuses = allCoupons.map((coupon) => ({
     id: coupon.id,
     applicable: isCouponApplicable(coupon.type, items, orderAmount, now),
