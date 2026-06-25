@@ -8,6 +8,7 @@ export interface Coupon {
 }
 
 export interface OrderPreviewRequest {
+  mode: 'auto' | 'manual';
   selectedItemIds: number[];
   coupons?: number[];
   isRemoteArea: boolean;

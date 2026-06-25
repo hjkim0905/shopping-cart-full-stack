@@ -39,10 +39,22 @@ function OrderConfirm() {
   });
 
   const fetchPreview = useCallback(
-    async (couponIds?: number[]) => {
+    async (couponIds: number[]) => {
       return getOrderPreview({
+        mode: 'manual',
         selectedItemIds,
         coupons: couponIds,
+        isRemoteArea,
+      });
+    },
+    [selectedItemIds, isRemoteArea],
+  );
+
+  const fetchPreviewAuto = useCallback(
+    async () => {
+      return getOrderPreview({
+        mode: 'auto',
+        selectedItemIds,
         isRemoteArea,
       });
     },
@@ -58,7 +70,7 @@ function OrderConfirm() {
   const isInitialized = useRef(false);
 
   useEffect(() => {
-    fetchPreview(undefined)
+    fetchPreviewAuto()
       .then((result) => {
         setPreview(result);
         setAppliedCouponIds(result.appliedCoupons);
